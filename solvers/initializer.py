@@ -8,8 +8,17 @@ class InitializationStrategy(Enum):
     RANDOM = 1
     GREEDY = 2
 
+    @staticmethod
+    def convert(text: str):
+        if text.upper() == "RANDOM":
+            return InitializationStrategy.RANDOM
+        elif text.upper() == "GREEDY":
+            return InitializationStrategy.GREEDY
+        else:
+            raise Exception("Unknown initialization strategy passed!")
 
-def initialize_solution(distances: np.ndarray, strategy: InitializationStrategy, start_city: int):
+
+def initialize_solution(distances: np.ndarray, strategy: InitializationStrategy, start_city=-1):
     order = []
     cost = 0
     if strategy == InitializationStrategy.RANDOM:
@@ -21,13 +30,16 @@ def initialize_solution(distances: np.ndarray, strategy: InitializationStrategy,
     return order, cost
 
 
-def find_random_order(distances: np.ndarray, start_city: int) -> List[int]:
+def find_random_order(distances: np.ndarray, start_city=-1) -> List[int]:
     assert (distances.shape[0] == distances.shape[1])
     number_of_cities = distances.shape[0]
-    result = [start_city]
 
-    # one city already in list
-    for _ in range(number_of_cities - 1):
+    result = []
+    if start_city != -1:
+        result.append(start_city)
+
+    # one city might already be in the list
+    for _ in range(number_of_cities - len(result)):
         result.append(random.choice(
             [x for x in range(number_of_cities) if x not in result]))
 
@@ -40,4 +52,6 @@ def calculate_total_cost(order: List[int], distances: np.ndarray):
         previous = order[city_index - 1]
         current = order[city_index]
         cost += distances[previous, current]
+    
+    cost += distances[order[0], order[-1]]
     return cost
