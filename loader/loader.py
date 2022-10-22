@@ -5,7 +5,7 @@ import numpy as np
 from .location import Location
 from typing import List
 
-#Calculate where actual data starts, based on given magic word indicating begining
+# Calculate where actual data starts, based on given magic word indicating begining
 def calculate_data_beginning(lines: List[str], magic_word: str) -> int:
     data_begin = 1
     for line in lines:
@@ -16,7 +16,7 @@ def calculate_data_beginning(lines: List[str], magic_word: str) -> int:
             break
     return data_begin
 
-#Load cities locations from file
+# Load cities locations from file
 def load_locations_from_file(filename: str, data_begining_magic_word="NODE_COORD_SECTION") -> List[Location]:
     locations = []
     with open(filename) as file:
@@ -29,10 +29,11 @@ def load_locations_from_file(filename: str, data_begining_magic_word="NODE_COORD
                 locations.append(Location(float(tokens[1]), float(tokens[2])))
     return locations
 
-#calculate distance between each location and put in matrix
-def calculate_distances_matrix(locations: List[Location]):
+# calculate distance between each location and put in matrix
+def calculate_distances_matrix(locations: List[Location]) -> np.ndarray:
     distances = np.zeros((len(locations), len(locations)), float)
     for base_location in range(0, len(locations)):
         for other_location in range(0, len(locations)):
-            distances[base_location, other_location] = locations[base_location].calculate_distance(locations[other_location])
+            distances[base_location, other_location] = locations[base_location].calculate_distance(
+                locations[other_location])
     return distances
