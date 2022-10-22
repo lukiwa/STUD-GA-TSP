@@ -9,8 +9,9 @@ def main():
     init_strategy =  InitializationStrategy.convert(configur.get("ea", "init_strategy"))
     start_city = configur.getint("ea", "start_city")
     pop_size = configur.getint("ea", "pop_size")
+    data_set = configur.get("ea", "data_set")
 
-    locations = load_locations_from_file("test_data/TSP/berlin11_modified.tsp")
+    locations = load_locations_from_file(f"test_data/TSP/{data_set}")
     distances = calculate_distances_matrix(locations)
 
     population = []
