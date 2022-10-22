@@ -1,7 +1,10 @@
 from enum import Enum
+from math import dist
 import numpy as np
 import random
 from typing import List
+
+from solvers.individual import Individual
 
 
 class InitializationStrategy(Enum):
@@ -55,3 +58,8 @@ def calculate_total_cost(order: List[int], distances: np.ndarray):
     
     cost += distances[order[0], order[-1]]
     return cost
+
+
+def create_individual(distances: np.ndarray, strategy: InitializationStrategy, start_city=-1):
+    order, cost = initialize_solution(distances, strategy, start_city)
+    return Individual(order=order, cost=cost)
