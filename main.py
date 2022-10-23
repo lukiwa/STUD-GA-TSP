@@ -5,7 +5,7 @@ from configparser import ConfigParser
 from functools import partial
 import random
 from solvers import initialize_population, evaluate, selection, crossover, mutation
-from solvers.genetic_algorithms import CrossoverStrategy
+from solvers.genetic_algorithms import CrossoverStrategy, MutationStrategy
 
 
 def main():
@@ -19,6 +19,7 @@ def main():
     crossover_probability = configur.getfloat("ea", "crossover_probability")
     mutation_probability = configur.getfloat("ea", "mutation_probability")
     crossover_strategy = CrossoverStrategy.convert(configur.get("ea", "crossover_strategy"))
+    mutation_strategy = MutationStrategy.convert(configur.get("ea", "mutation_strategy"))
 
     locations = load_locations_from_file(f"test_data/TSP/{data_set}")
     distances = calculate_distances_matrix(locations)
@@ -30,24 +31,22 @@ def main():
     P1 = Individual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 0)
     P2 = Individual([0, 5, 7, 4, 9, 1, 3, 6, 2, 8], 0)
 
-    child = crossover(P1, P2, crossover_strategy)
+    #child = crossover(P1, P2, crossover_strategy, crossover_probability)
+    child = mutation(P1, mutation_strategy, mutation_probability)
     print(child.order)
     '''
-    while current_population < max_generations:
+    while current_population_index < max_generations:
         populations.append([])
-        while len(populations[current_population + 1]) < pop_size:ś
-            P1 = selection(populations[current_population])
-            P2 = selection(populations[current_population])
-            if random.uniform(0, 1) < crossover_probability:
-                O1 = crossover(P1, P2)
-            else:
-                O1 = P1
-            O1 = mutation(O1, mutation_probability)
+        while len(populations[current_population_index + 1]) < pop_size:ś
+            P1 = selection(populations[current_population_index])
+            P2 = selection(populations[current_population_index])
+            O1 = crossover(P1, P2, crossover_strategy, crossover_probability)
+            O1 = mutation(O1, mutation_strategy, mutation_probability)
             evaluate(O1)
-            populations[current_population + 1].append(O1)
+            populations[current_population_index + 1].append(O1)
             #if best_solution > O1:
             #    best_solution = O1
-        current_population += 1
+        current_population_index += 1
     '''
 
 if __name__ == "__main__":

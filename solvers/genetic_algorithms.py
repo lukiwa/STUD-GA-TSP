@@ -1,5 +1,6 @@
 from cmath import inf
 import imp
+from turtle import st
 import numpy as np
 import random
 from .individual import Individual
@@ -18,6 +19,19 @@ class CrossoverStrategy(Enum):
             return CrossoverStrategy.ERX
         else:
             raise Exception("Unknown crossover strategy passed!")
+
+class MutationStrategy(Enum):
+    SWAP = 1
+    INVERSE = 2
+
+    @staticmethod
+    def convert(text: str):
+        if text.upper() == "SWAP":
+            return MutationStrategy.SWAP
+        elif text.upper() == "INVERSE":
+            return MutationStrategy.INVERSE
+        else:
+            raise Exception("Unknown mutation strategy passed!")
 
 def initialize_population(pop_size: int, individual_generator):
     population = []
@@ -98,12 +112,13 @@ def edge_recombination_crossover(first_indivudual: Individual, second_individual
     return Individual(child_order, 0)
 
 
-def crossover(first_indivudual: Individual, second_individual: Individual, crossover_strategy: CrossoverStrategy) -> Individual:
-    result = Individual([])
-    if crossover_strategy == CrossoverStrategy.OX:
-        result = ordered_crossover(first_indivudual, second_individual)
-    if crossover_strategy == CrossoverStrategy.ERX:
-        result = edge_recombination_crossover(first_indivudual, second_individual)
+def crossover(first_indivudual: Individual, second_individual: Individual, strategy: CrossoverStrategy, probability: float) -> Individual:
+    result = first_indivudual
+    if random.uniform(0, 1) < probability:
+        if strategy == CrossoverStrategy.OX:
+            result = ordered_crossover(first_indivudual, second_individual)
+        if strategy == CrossoverStrategy.ERX:
+            result = edge_recombination_crossover(first_indivudual, second_individual)
     
     # Assert every city excatly once
     assert (np.unique(result.order).size == len(result.order))
@@ -111,6 +126,23 @@ def crossover(first_indivudual: Individual, second_individual: Individual, cross
     assert (all(x in result.order for x in first_indivudual.order) and all(x in result.order for x in second_individual.order))
     return result
 
+def swap_mutation(individual: Individual) -> Individual:
+    size = len(individual.order)
+    start, end = sorted([random.randrange(size) for _ in range(2)])
+    individual.order[start], individual.order[end] = individual.order[end], individual.order[start]
+    return individual
 
-def mutation(individual, mutation_probability):
-    pass
+def inverse_mutation(individual: Individual) -> Individual:
+    size = len(individual.order)
+    start, end = sorted([random.randrange(size) for _ in range(2)])
+    individual.order[start:end] = reversed(individual.order[start:end])
+    return individual
+
+def mutation(individual: Individual, strategy: MutationStrategy, probability: float) -> Individual:
+    result = individual
+    if random.uniform(0, 1) < probability:
+        if strategy == MutationStrategy.SWAP:
+            result = swap_mutation(individual)
+        if strategy == MutationStrategy.INVERSE:
+            result = inverse_mutation(individual)
+    return result
