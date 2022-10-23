@@ -13,3 +13,5 @@ class Individual:
             self.cost += distances[previous, current]
     
         self.cost += distances[self.order[0], self.order[-1]]
+    def __repr__(self):
+        return f"Order:{self.order}_Cost:{self.cost}"

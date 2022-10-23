@@ -6,6 +6,8 @@ import random
 from .individual import Individual
 from collections import Counter
 from enum import Enum
+from typing import List
+from tqdm import tqdm
 
 class CrossoverStrategy(Enum):
     OX = 1
@@ -35,7 +37,7 @@ class MutationStrategy(Enum):
 
 def initialize_population(pop_size: int, individual_generator):
     population = []
-    for _ in range(pop_size):
+    for _ in tqdm(range(pop_size), desc="Initializing population..."):
         population.append(individual_generator())
     return population
 
@@ -56,8 +58,12 @@ def remove_from_neightbour_list(element, neightbour_list):
 def evaluate(individual):
     pass
 
-def selection(population):
-    pass
+#tour_size = percent of population
+def selection(population: List[Individual], tour_size: float) -> Individual:
+    num_to_pick = int(len(population) * tour_size)
+    competitors = random.sample(population, num_to_pick)
+    return min(competitors, key=lambda competitor: competitor.cost)
+    
 
 def ordered_crossover(first_indivudual: Individual, second_individual: Individual) -> Individual:
     size = len(first_indivudual.order)
@@ -112,7 +118,7 @@ def edge_recombination_crossover(first_indivudual: Individual, second_individual
     return Individual(child_order, 0)
 
 
-def crossover(first_indivudual: Individual, second_individual: Individual, strategy: CrossoverStrategy, probability: float) -> Individual:
+def crossover(first_indivudual: Individual, second_individual: Individual, strategy: CrossoverStrategy, probability: float, distances: np.ndarray) -> Individual:
     result = first_indivudual
     if random.uniform(0, 1) < probability:
         if strategy == CrossoverStrategy.OX:
@@ -124,6 +130,7 @@ def crossover(first_indivudual: Individual, second_individual: Individual, strat
     assert (np.unique(result.order).size == len(result.order))
     # Assert every city is present
     assert (all(x in result.order for x in first_indivudual.order) and all(x in result.order for x in second_individual.order))
+    result.calculate_cost(distances)
     return result
 
 def swap_mutation(individual: Individual) -> Individual:
@@ -138,11 +145,12 @@ def inverse_mutation(individual: Individual) -> Individual:
     individual.order[start:end] = reversed(individual.order[start:end])
     return individual
 
-def mutation(individual: Individual, strategy: MutationStrategy, probability: float) -> Individual:
+def mutation(individual: Individual, strategy: MutationStrategy, probability: float, distances: np.ndarray) -> Individual:
     result = individual
     if random.uniform(0, 1) < probability:
         if strategy == MutationStrategy.SWAP:
             result = swap_mutation(individual)
         if strategy == MutationStrategy.INVERSE:
             result = inverse_mutation(individual)
+    result.calculate_cost(distances)
     return result

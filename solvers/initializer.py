@@ -3,7 +3,6 @@ from math import dist
 import numpy as np
 import random
 from typing import List
-
 from solvers.individual import Individual
 
 
