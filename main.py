@@ -1,13 +1,14 @@
 from cmath import inf
 from dis import dis
 from math import dist
+from tkinter.tix import Select
 from loader import load_locations_from_file, calculate_distances_matrix
 from solvers import initialize_solution, InitializationStrategy, Individual
 from configparser import ConfigParser
 from functools import partial
 import random
 from solvers import initialize_population, evaluate, selection, crossover, mutation
-from solvers.genetic_algorithms import CrossoverStrategy, MutationStrategy
+from solvers.genetic_algorithms import CrossoverStrategy, MutationStrategy, SelectionStrategy
 from tqdm import tqdm
 
 def main():
@@ -23,6 +24,7 @@ def main():
     crossover_strategy = CrossoverStrategy.convert(configur.get("ea", "crossover_strategy"))
     mutation_strategy = MutationStrategy.convert(configur.get("ea", "mutation_strategy"))
     tour_size = configur.getfloat("ea", "tour_size")
+    selection_strategy = SelectionStrategy.convert(configur.get("ea", "selection_strategy"))
 
     locations = load_locations_from_file(f"test_data/TSP/{data_set}.tsp")
     distances = calculate_distances_matrix(locations)
@@ -33,13 +35,13 @@ def main():
     for current_population_index in tqdm(range(max_generations), desc="Performing genetic algorithm..."):
         populations.append([])
         while len(populations[current_population_index + 1]) < pop_size:
-            P1 = selection(populations[current_population_index], tour_size)
-            P2 = selection(populations[current_population_index], tour_size)
+            P1 = selection(populations[current_population_index], selection_strategy, tour_size)
+            P2 = selection(populations[current_population_index], selection_strategy, tour_size)
             O1 = crossover(P1, P2, crossover_strategy, crossover_probability, distances)
             O1 = mutation(O1, mutation_strategy, mutation_probability, distances)
             #evaluate(O1) #TODO
             populations[current_population_index + 1].append(O1)
-            if best_solution.cost > O1.cost:
+            if O1.cost < best_solution.cost:
                 best_solution = O1
 
     print(f"Best solution: {best_solution.cost}")

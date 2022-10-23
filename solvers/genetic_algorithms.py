@@ -1,6 +1,8 @@
 from cmath import inf
 import imp
+from math import exp
 from turtle import st
+from unittest import result
 import numpy as np
 import random
 from .individual import Individual
@@ -35,6 +37,19 @@ class MutationStrategy(Enum):
         else:
             raise Exception("Unknown mutation strategy passed!")
 
+class SelectionStrategy(Enum):
+    COMPETITION = 1
+    ROULETTE = 2
+
+    @staticmethod
+    def convert(text: str):
+        if text.upper() == "COMPETITION":
+            return SelectionStrategy.COMPETITION
+        elif text.upper() == "ROULETTE":
+            return SelectionStrategy.ROULETTE
+        else:
+            raise Exception("Unknown selection strategy passed!")
+
 def initialize_population(pop_size: int, individual_generator):
     population = []
     for _ in tqdm(range(pop_size), desc="Initializing population..."):
@@ -58,11 +73,25 @@ def remove_from_neightbour_list(element, neightbour_list):
 def evaluate(individual):
     pass
 
-#tour_size = percent of population
-def selection(population: List[Individual], tour_size: float) -> Individual:
+def competition_selection(population: List[Individual], tour_size: float) -> Individual:
     num_to_pick = int(len(population) * tour_size)
     competitors = random.sample(population, num_to_pick)
     return min(competitors, key=lambda competitor: competitor.cost)
+
+def roulette_selection(population: List[Individual]) -> Individual:
+    fitnesses = sum([individual.fitness for individual in population])
+    probabilities = [individual.fitness/fitnesses for individual in population]
+    return np.random.choice(population, p=probabilities)
+
+#tour_size = percent of population for competition strategy
+def selection(population: List[Individual], strategy: SelectionStrategy, tour_size: float) -> Individual:
+    result = population[0]
+    if strategy == SelectionStrategy.COMPETITION:
+        result = competition_selection(population, tour_size)    
+    if strategy == SelectionStrategy.ROULETTE:
+        result = roulette_selection(population)
+    
+    return result
     
 
 def ordered_crossover(first_indivudual: Individual, second_individual: Individual) -> Individual:
