@@ -21,16 +21,16 @@ class InitializationStrategy(Enum):
             raise Exception("Unknown initialization strategy passed!")
 
 
-def initialize_solution(distances: np.ndarray, strategy: InitializationStrategy, start_city=-1):
+def initialize_solution(distances: np.ndarray, strategy: InitializationStrategy, start_city=-1) -> Individual:
     order = []
-    cost = 0
     if strategy == InitializationStrategy.RANDOM:
         order = find_random_order(distances, start_city)
-        cost = calculate_total_cost(order, distances)
     elif strategy == InitializationStrategy.GREEDY:
         raise Exception("Greedy initialization strategy not implemented yet!")
 
-    return order, cost
+    result = Individual(order)
+    result.calculate_cost(distances)
+    return result
 
 
 def find_random_order(distances: np.ndarray, start_city=-1) -> List[int]:
@@ -47,19 +47,3 @@ def find_random_order(distances: np.ndarray, start_city=-1) -> List[int]:
             [x for x in range(number_of_cities) if x not in result]))
 
     return result
-
-
-def calculate_total_cost(order: List[int], distances: np.ndarray):
-    cost = 0
-    for city_index in range(1, len(order)):
-        previous = order[city_index - 1]
-        current = order[city_index]
-        cost += distances[previous, current]
-    
-    cost += distances[order[0], order[-1]]
-    return cost
-
-
-def create_individual(distances: np.ndarray, strategy: InitializationStrategy, start_city=-1):
-    order, cost = initialize_solution(distances, strategy, start_city)
-    return Individual(order=order, cost=cost)

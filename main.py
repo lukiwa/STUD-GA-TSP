@@ -1,6 +1,6 @@
 from math import dist
 from loader import load_locations_from_file, calculate_distances_matrix
-from solvers import initialize_solution, create_individual, InitializationStrategy, Individual
+from solvers import initialize_solution, InitializationStrategy, Individual
 from configparser import ConfigParser
 from functools import partial
 import random
@@ -22,11 +22,15 @@ def main():
     locations = load_locations_from_file(f"test_data/TSP/{data_set}")
     distances = calculate_distances_matrix(locations)
 
-    populations = [initialize_population(pop_size, partial(
-        create_individual, distances, init_strategy, start_city))]
+    populations = [initialize_population(pop_size, partial(initialize_solution, distances, init_strategy, start_city))]
     current_population = 0
     #best_solution = Individual([], 0)
 
+    P1 = Individual([1, 2, 3, 4, 5, 6, 7, 8, 9], 0)
+    P2 = Individual([5, 7, 4, 9, 1, 3, 6, 2, 8], 0)
+
+    child = crossover(P1, P2)
+    '''
     while current_population < max_generations:
         populations.append([])
         while len(populations[current_population + 1]) < pop_size:
@@ -42,7 +46,7 @@ def main():
             #if best_solution > O1:
             #    best_solution = O1
         current_population += 1
-
+    '''
 
 if __name__ == "__main__":
     main()
