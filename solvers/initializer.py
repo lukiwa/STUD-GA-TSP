@@ -36,13 +36,10 @@ def find_random_order(distances: np.ndarray, start_city=-1) -> List[int]:
     assert (distances.shape[0] == distances.shape[1])
     number_of_cities = distances.shape[0]
 
-    result = []
+    result = np.arange(number_of_cities).tolist()
+    random.shuffle(result)
     if start_city != -1:
-        result.append(start_city)
-
-    # one city might already be in the list
-    for _ in range(number_of_cities - len(result)):
-        result.append(random.choice(
-            [x for x in range(number_of_cities) if x not in result]))
+        index = result.index(start_city)
+        result[index], result[0] = result[0], result[index]
 
     return result
